@@ -73,6 +73,6 @@ CREATE PROCEDURE MostraClientesAniversarioPorMes
     @mes numeric(2,0)
 AS
 BEGIN 
-    select Nome, Day(DATANASCIMENTO) from CLIENTES where Month(DATANASCIMENTO) = @mes
+    select Nome, Day(DATANASCIMENTO) as Dia from CLIENTES where Month(DATANASCIMENTO) = @mes
 END
 EXEC MostraClientesAniversarioPorMes 5;
