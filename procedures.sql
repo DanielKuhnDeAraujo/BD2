@@ -93,4 +93,3 @@ BEGIN
     delete from CLIENTES where COD_CLIENTE = @ID
 
 END
-select count(*) from CLIENTES;
