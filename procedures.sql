@@ -88,7 +88,9 @@ EXEC Update_Dados_Cliente 12, '123456789', 'João Silva', 'Rua das Flores, 123', 
 CREATE PROCEDURE Deleta_cliente
 	@ID numeric(18,0)
 AS
-BEGIN 
+BEGIN
+	delete from LOCACOES  where COD_CLIENTE = @ID
     delete from CLIENTES where COD_CLIENTE = @ID
+
 END
 select count(*) from CLIENTES;

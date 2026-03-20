@@ -60,13 +60,16 @@ BEGIN
     WHERE COD_CLIENTE = @COD_CLIENTE
 END
 /*Delete*/
+
 CREATE PROCEDURE Deleta_cliente
 	@ID numeric(18,0)
 AS
-BEGIN 
+BEGIN
+	delete from LOCACOES  where COD_CLIENTE = @ID
     delete from CLIENTES where COD_CLIENTE = @ID
+
 END
-select count(*) from CLIENTES;
+
 
 /*2)*/
 CREATE PROCEDURE MostraClientesAniversarioPorMes
@@ -77,7 +80,15 @@ BEGIN
 END
 EXEC MostraClientesAniversarioPorMes 1;
 /*3)*/
+create procedure TodosporMes 
+as
+begin
 select M.mes as Mês , count(c.DATANASCIMENTO) 
 from (values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12) ) as M(mes) 
 left join CLIENTES as c on Month(c.DATANASCIMENTO) = M.mes group BY M.mes order by M.mes asc
 select Month(DATANASCIMENTO),Count(*) from CLIENTES group by Month(DATANASCIMENTO) order by Month(DATANASCIMENTO) asc 
+end
+/*4)*/
+create procedure SelecionarClienteCidadeIdade
+ @cidade varchar(30)
+as
