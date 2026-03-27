@@ -15,6 +15,17 @@ BEGIN
     INSERT INTO CLIENTES ([RG],[NOME], [ENDERECO], [BAIRRO], [CIDADE], [ESTADO], [TELEFONE], [EMAIL], [DATANASCIMENTO], [Sexo]) 
     VALUES (@RG,@NOME, @ENDERECO, @BAIRRO, @CIDADE, @ESTADO, @TELEFONE, @EMAIL, @DATANASCIMENTO, @Sexo)
 END 
+EXEC Inclui_Cliente
+    @RG = '123456789',
+    @NOME = 'João da Silva',
+    @ENDERECO = 'Rua das Flores, 123',
+    @BAIRRO = 'Centro',
+    @CIDADE = 'Sorocaba',
+    @ESTADO = 'SP',
+    @TELEFONE = '(15)99999-9999',
+    @EMAIL = 'joao.silva@email.com',
+    @DATANASCIMENTO = '1990-05-15',
+    @Sexo = 'M';
 /*Read*/
 CREATE PROCEDURE Mostra_Clientes
 AS
@@ -90,5 +101,37 @@ select Month(DATANASCIMENTO),Count(*) from CLIENTES group by Month(DATANASCIMENT
 end
 /*4)*/
 create procedure SelecionarClienteCidadeIdade
- @cidade varchar(30)
+ @cidade varchar(30),
+ @idade  numeric(3,0)
 as
+begin
+select c.NOME,
+	   c.DATANASCIMENTO,
+	   (
+	   DATEDIFF(YEAR,C.DATANASCIMENTO,GETDATE()) 
+	   - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,C.DATANASCIMENTO,GETDATE()),C.DATANASCIMENTO) > GETDATE()
+	   THEN 1 ELSE 0 END
+	   ) AS IDADE 
+	   from CLIENTES as c  
+	   where C.CIDADE = @cidade 
+	   and (
+	   DATEDIFF(YEAR,C.DATANASCIMENTO,GETDATE()) 
+	   - CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,C.DATANASCIMENTO,GETDATE()),C.DATANASCIMENTO) > GETDATE()
+	   THEN 1 ELSE 0 END 
+	   ) <=@idade;
+end ;
+exec SelecionarClienteCidadeIdade 'Sorocaba' , 50;
+
+/*5)*/
+Alter table filme
+add status varchar(10) not null default 'disponível'
+
+alter table locacoes 
+add Data_Devolucao datetime null;
+/*adicionei alguns insert intos de exemplo*/
+select* from LOCACOES;
+
+create procedure InserirLocacao
+	@id_cliente numeric(18,0),
+	@id_filme numeric(18,0)
+as 
