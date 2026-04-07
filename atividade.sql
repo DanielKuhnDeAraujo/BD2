@@ -1,5 +1,5 @@
 /*Create*/
-CREATE PROCEDURE Inclui_Cliente
+cReAte pROcEDuRE Inclui_Cliente
 	@RG VARCHAR(9),
     @NOME VARCHAR(50), 
     @ENDERECO VARCHAR(50), 
@@ -14,19 +14,22 @@ AS
 BEGIN 
     INSERT INTO CLIENTES ([RG],[NOME], [ENDERECO], [BAIRRO], [CIDADE], [ESTADO], [TELEFONE], [EMAIL], [DATANASCIMENTO], [Sexo]) 
     VALUES (@RG,@NOME, @ENDERECO, @BAIRRO, @CIDADE, @ESTADO, @TELEFONE, @EMAIL, @DATANASCIMENTO, @Sexo)
-END 
+END
 EXEC Inclui_Cliente
-    @RG = '123456789',
-    @NOME = 'João da Silva',
-    @ENDERECO = 'Rua das Flores, 123',
+    @RG = '123453459',
+    @NOME = 'José Pinheiro Silva',
+    @ENDERECO = 'Rua das Flores, 132',
     @BAIRRO = 'Centro',
     @CIDADE = 'Sorocaba',
     @ESTADO = 'SP',
-    @TELEFONE = '(15)99999-9999',
-    @EMAIL = 'joao.silva@email.com',
-    @DATANASCIMENTO = '1990-05-15',
+    @TELEFONE = '(15)99123-9999',
+    @EMAIL = 'jose.silva@email.com',
+    @DATANASCIMENTO = '19870415',
     @Sexo = 'M';
+select * from CLIENTES
+
 /*Read*/
+go
 CREATE PROCEDURE Mostra_Clientes
 AS
 BEGIN 
@@ -42,7 +45,7 @@ BEGIN
     select * from CLIENTES where COD_CLIENTE = @ID
 END
 /*Update*/
-CREATE PROCEDURE Update_Dados_Cliente
+CREATE PROCEDURE Alterar_Cliente
 	@COD_CLIENTE numeric(18,0),
 	@RG VARCHAR(9),
     @NOME VARCHAR(50), 
@@ -70,6 +73,19 @@ BEGIN
         Sexo = @Sexo
     WHERE COD_CLIENTE = @COD_CLIENTE
 END
+select * from CLIENTES
+EXEC Alterar_Cliente
+	@COD_CLIENTE = 13,
+    @RG = '123453459',
+    @NOME = 'José Pinheiro Silva',
+    @ENDERECO = 'Rua das Flores, 132',
+    @BAIRRO = 'Centro',
+    @CIDADE = 'Sorocaba',
+    @ESTADO = 'SP',
+    @TELEFONE = '(15)99123-9999',
+    @EMAIL = 'jose.silva@email.com',
+    @DATANASCIMENTO = '19870415',
+    @Sexo = 'M';
 /*Delete*/
 
 CREATE PROCEDURE Deleta_cliente
