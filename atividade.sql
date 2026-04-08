@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*Create*/
 CREATE PROCEDURE Inclui_Cliente
 	@RG VARCHAR(9),
@@ -306,4 +305,19 @@ create procedure InserirLocacao
 	@id_cliente numeric(18,0),
 	@id_filme numeric(18,0)
 as 
->>>>>>> 6c75685ab450951dccb591f560939195ed1a09bb
+begin 
+insert into LOCACOES (COD_CLIENTE,COD_FILME,DATA_LOCACAO,DATA_EXPIRACAO) values (@id_cliente,@id_filme,GETDATE(),DATEADD(DAY,5,GETDATE()));
+update FILME set status  = 'alugado' where COD_FILME = @id_filme;
+end
+exec InserirLocacao 1,5;
+
+create procedure Devolver_Filme
+@id_locacao numeric(18,0)
+as begin
+update LOCACOES set Data_Devolucao = GETDATE() where COD_LOCACAO = @id_locacao;
+update filme set status = 'disponivel'  
+    from filme as f 
+    inner join LOCACOES  l on l.COD_FILME = f.COD_FILME 
+    where l.COD_LOCACAO = @id_locacao;
+end
+exec Devolver_Filme 24;
