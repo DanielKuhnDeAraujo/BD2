@@ -1,3 +1,4 @@
+/*TUDO PRONTO*/
 /* Trigger 1 */
 CREATE TABLE CAIXA
 (
