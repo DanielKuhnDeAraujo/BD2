@@ -82,3 +82,29 @@ WHERE Id = 1;
 
 select * from LogClientes
 select * from tab_clientes
+
+/*Triggers uteis*/
+create trigger Inserir_Locacao
+on LOCACOES
+after insert 
+as
+begin
+	update FILME set status  = 'alugado' where COD_FILME = (select  COD_FILME from inserted);
+end 
+
+
+
+drop trigger devolve_filme
+create trigger Devolve_Filme on LOCACOES
+after update 
+as 
+begin 
+	update filme set status ='disponivel' from filme f inner join inserted i on  f.COD_FILME = i.COD_FILME
+end 
+
+
+/*Lojinha*/
+
+create table lj_produto (
+	
+);
