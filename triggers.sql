@@ -143,3 +143,57 @@ begin
 end
 
 insert into lj_produto(nome, unidade, preco, descricao) values ('Monster', 'Lata', 11.9, 'Monster original');
+
+/*Triggers venda*/
+
+create trigger Venda on lj_venda
+after insert 
+as
+begin
+    update lj_estoque set qtd = lj_estoque.qtd - inserted.qtd from lj_estoque 
+    inner join inserted on lj_estoque.id_prod = inserted.id_prod where lj_estoque.id_prod = inserted.id_prod;
+end
+insert into lj_venda(id_prod, dia, id_cliente, qtd ) values (1, getdate(),10,3);
+
+select * from lj_estoque;
+select * from lj_venda;
+
+/*delete*/
+
+create trigger DelVenda on lj_venda
+after delete 
+as
+begin
+    update lj_estoque set qtd = lj_estoque.qtd + deleted.qtd from lj_estoque 
+    inner join deleted on lj_estoque.id_prod = deleted.id_prod where lj_estoque.id_prod = deleted.id_prod;
+end
+delete from lj_venda where id = 3;
+select * from lj_estoque;
+select * from lj_venda;
+
+
+/* Triggers compra */
+
+create trigger Compra on lj_compra
+after insert 
+as
+begin
+    update lj_estoque set qtd = lj_estoque.qtd + inserted.qtd from lj_estoque 
+    inner join inserted on lj_estoque.id_prod = inserted.id_prod where lj_estoque.id_prod = inserted.id_prod;
+end
+insert into lj_compra(id_prod, dia, id_fornecedor, qtd ) values (1, getdate(),10,3);
+
+select * from lj_estoque;
+select * from lj_compra;
+
+/*delete*/
+create trigger DelCompra on lj_compra
+after delete 
+as
+begin
+    update lj_estoque set qtd = lj_estoque.qtd - deleted.qtd from lj_estoque 
+    inner join deleted on lj_estoque.id_prod = deleted.id_prod where lj_estoque.id_prod = deleted.id_prod;
+end
+delete from lj_compra where id = 2;
+select * from lj_estoque;
+select * from lj_compra;
