@@ -1,4 +1,5 @@
 /*TUDO PRONTO*/
+/*Daniel Kühn de Araújo*/
 /* Trigger 1 */
 CREATE TABLE CAIXA
 (
@@ -153,10 +154,7 @@ begin
     update lj_estoque set qtd = lj_estoque.qtd - inserted.qtd from lj_estoque 
     inner join inserted on lj_estoque.id_prod = inserted.id_prod where lj_estoque.id_prod = inserted.id_prod;
 end
-insert into lj_venda(id_prod, dia, id_cliente, qtd ) values (1, getdate(),10,3);
 
-select * from lj_estoque;
-select * from lj_venda;
 
 /*delete*/
 
@@ -167,11 +165,17 @@ begin
     update lj_estoque set qtd = lj_estoque.qtd + deleted.qtd from lj_estoque 
     inner join deleted on lj_estoque.id_prod = deleted.id_prod where lj_estoque.id_prod = deleted.id_prod;
 end
-delete from lj_venda where id = 3;
-select * from lj_estoque;
-select * from lj_venda;
 
-
+/*update*/
+create trigger UpVenda on lj_venda
+after update 
+as
+begin
+    update lj_estoque set qtd = lj_estoque.qtd - inserted.qtd from lj_estoque 
+    inner join inserted on lj_estoque.id_prod = inserted.id_prod where lj_estoque.id_prod = inserted.id_prod;
+	update lj_estoque set qtd = lj_estoque.qtd + deleted.qtd from lj_estoque 
+    inner join deleted on lj_estoque.id_prod = deleted.id_prod where lj_estoque.id_prod = deleted.id_prod;
+end
 /* Triggers compra */
 
 create trigger Compra on lj_compra
@@ -181,10 +185,7 @@ begin
     update lj_estoque set qtd = lj_estoque.qtd + inserted.qtd from lj_estoque 
     inner join inserted on lj_estoque.id_prod = inserted.id_prod where lj_estoque.id_prod = inserted.id_prod;
 end
-insert into lj_compra(id_prod, dia, id_fornecedor, qtd ) values (1, getdate(),10,3);
 
-select * from lj_estoque;
-select * from lj_compra;
 
 /*delete*/
 create trigger DelCompra on lj_compra
@@ -194,6 +195,35 @@ begin
     update lj_estoque set qtd = lj_estoque.qtd - deleted.qtd from lj_estoque 
     inner join deleted on lj_estoque.id_prod = deleted.id_prod where lj_estoque.id_prod = deleted.id_prod;
 end
-delete from lj_compra where id = 2;
-select * from lj_estoque;
-select * from lj_compra;
+
+
+/*update*/
+go
+create trigger UpCompra on lj_compra
+after update
+as
+begin
+    update lj_estoque set qtd = lj_estoque.qtd + inserted.qtd  from lj_estoque 
+    inner join inserted on lj_estoque.id_prod = inserted.id_prod where lj_estoque.id_prod = inserted.id_prod;
+	update lj_estoque set qtd = lj_estoque.qtd - deleted.qtd from lj_estoque 
+    inner join deleted on lj_estoque.id_prod = deleted.id_prod where lj_estoque.id_prod = deleted.id_prod;
+end
+
+
+
+/*adicionar financeiro*/
+alter table lj_venda
+add qtd_parcelas int not null default 1 ;
+alter table lj_venda 
+add valor_total int not null default 0;
+
+create table lj_parcelas (
+	id int identity(1,1) primary key not null,
+	id_venda int not null foreign key references lj_venda(id),
+	vencimento datetime not null,
+	pag_efetivo datetime not null,
+	preco float not null
+);
+/*insert into lj_compra(id_prod, dia, id_fornecedor, qtd ,valor_total) values (1, getdate(),10,3,35.70);*/
+
+
