@@ -225,5 +225,96 @@ create table lj_parcelas (
 	preco float not null
 );
 /*insert into lj_compra(id_prod, dia, id_fornecedor, qtd ,valor_total) values (1, getdate(),10,3,35.70);*/
+insert into lj_compra(id_prod, dia, id_fornecedor, qtd ) values (1, getdate(),10,100);
 
 
+
+GO
+Create trigger DeletarParcelasVenda on lj_venda
+after delete
+as 
+begin 
+	declare @I int ;
+	select @I = id from inserted
+	delete from lj_parcelas where id_venda  = @I;
+
+end
+
+/***********************/
+
+GO
+ALTER trigger CriarParcelasVenda on lj_venda
+after insert
+as 
+begin 
+	DECLARE @I INT = 1;
+	DECLARE @PARC INT ;
+	SELECT  @PARC= qtd_parcelas from inserted;
+	-- Loop WHILE
+	insert into lj_parcelas (id_venda,vencimento,pag_efetivo,preco)
+	select id,getdate(),GETDATE(),valor_total/qtd_parcelas  from inserted
+	WHILE @I < @PARC
+	BEGIN
+		insert into lj_parcelas (id_venda,vencimento,preco)
+		select id,dateadd(MONTH,@I,GETDATE()),valor_total/qtd_parcelas  from inserted
+		SET @I += 1;
+	END
+
+end
+
+create table lj_FeriadosFixos (
+id int identity(1,1) primary key,
+nome varchar(20) not null,
+data date);
+
+INSERT INTO lj_FeriadosFixos (nome, data)
+VALUES
+('Confraternização Universal', '2026-01-01'),
+('Tiradentes', '2026-04-21'),
+('Dia do Trabalho', '2026-05-01'),
+('Independência do Brasil', '2026-09-07'),
+('Nossa Senhora Aparecida', '2026-10-12'),
+('Finados', '2026-11-02'),
+('Proclamação da República', '2026-11-15'),
+('Natal', '2026-12-25');
+
+create table lj_FeriadosVaria (
+id int identity(1,1) primary key,
+nome varchar(20) not null,
+data date);
+
+INSERT INTO lj_FeriadosVaria (nome, data)
+VALUES
+
+-- Ano 2026
+('Carnaval', '2026-02-17'),
+('Sexta-feira Santa', '2026-04-03'),
+('Páscoa', '2026-04-05'),
+('Corpus Christi', '2026-06-04'),
+
+-- Ano 2027
+('Carnaval', '2027-02-09'),
+('Sexta-feira Santa', '2027-03-26'),
+('Páscoa', '2027-03-28'),
+('Corpus Christi', '2027-05-27');
+
+go 
+create procedure DeletarVenda 
+@id int
+as 
+begin 
+ delete from lj_parcelas where id_venda = @id;
+ delete from lj_venda where id = @id;
+end
+
+select * from lj_parcelas
+go
+create trigger CorrigirData on lj_parcelas
+after insert 
+as 
+begin
+ if (( DATEPART(weekday, (select vencimento from inserted))) = 7 )
+ begin 
+	update lj_parcelas set vencimento = DATEADD(day,2,i.vencimento) from lj_parcelas l inner join inserted i on lj_parcelas.id = i.id;
+ end 
+end
