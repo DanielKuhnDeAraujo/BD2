@@ -309,12 +309,65 @@ end
 
 select * from lj_parcelas
 go
-create trigger CorrigirData on lj_parcelas
-after insert 
-as 
-begin
- if (( DATEPART(weekday, (select vencimento from inserted))) = 7 )
- begin 
-	update lj_parcelas set vencimento = DATEADD(day,2,i.vencimento) from lj_parcelas l inner join inserted i on lj_parcelas.id = i.id;
- end 
-end
+
+/*XABLAU*/
+
+
+
+drop trigger CorrigirData
+go
+CREATE TRIGGER CorrigirData ON lj_parcelas
+AFTER INSERT 
+AS 
+BEGIN
+    DECLARE @id INT;
+    DECLARE @vencimento DATE;
+    DECLARE @contador INT;
+    DECLARE @total INT;
+    
+    -- Pega o total de registros inseridos
+    SELECT @total = COUNT(*) FROM inserted;
+    SET @contador = 1;
+    
+    -- Enquanto tiver registros para processar
+    WHILE @contador <= @total
+    BEGIN
+        -- Pega o ID e a data do registro atual
+        SELECT @id = id, @vencimento = CAST(vencimento AS DATE)
+        FROM (
+            SELECT id, vencimento, ROW_NUMBER() OVER (ORDER BY id) AS linha
+            FROM inserted
+        ) AS temp
+        WHERE linha = @contador;
+        
+        -- Enquanto for sábado, domingo ou feriado, avança 1 dia
+        WHILE (
+            (DATEPART(weekday, @vencimento) = 1) OR  -- Domingo
+            (DATEPART(weekday, @vencimento) = 7) OR  -- Sábado
+            EXISTS (SELECT 1 FROM lj_FeriadosFixos WHERE MONTH(data) = MONTH(@vencimento) AND DAY(data) = DAY(@vencimento)) OR
+            EXISTS (SELECT 1 FROM lj_FeriadosVaria WHERE data = @vencimento)
+        )
+        BEGIN
+            SET @vencimento = DATEADD(day, 1, @vencimento);
+        END
+        
+        -- Atualiza a data se mudou
+        UPDATE lj_parcelas 
+        SET vencimento = @vencimento 
+        WHERE id = @id;
+        
+        SET @contador = @contador + 1;
+    END
+END
+
+/*teste*/
+
+INSERT INTO lj_parcelas (id_venda, vencimento, preco) 
+VALUES (4, DATEADD(day,6,getdate()),100.00);
+select * from lj_parcelas
+
+INSERT INTO lj_parcelas (id_venda, vencimento, preco) 
+VALUES (4, DATEADD(day,3,getdate()),100.00);
+select * from lj_parcelas
+
+
